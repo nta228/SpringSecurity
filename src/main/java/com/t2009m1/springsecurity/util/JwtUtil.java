@@ -1,9 +1,10 @@
-package com.t2010a.baovemuaxuan.util;
+package com.t2009m1.springsecurity.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.t2009m1.springsecurity.entity.Account;
 
 import java.util.Date;
 
@@ -21,6 +22,7 @@ public class JwtUtil {
     public static final int ONE_HOUR = ONE_MINUTE * 60;
     public static final int ONE_DAY = ONE_HOUR * 24;
     public static final String ROLE_CLAIM_KEY = "role";
+    private static final String DEFAULT_ISSUER = "TUANANH";
 
     public static Algorithm getAlgorithm() {
         if (algorithm == null) {
@@ -57,6 +59,16 @@ public class JwtUtil {
                 //.withClaim(JwtUtil.ROLE_CLAIM_KEY, user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 //when role n -> 1 user
                 .withClaim(JwtUtil.ROLE_CLAIM_KEY, role) //get first role in Authorities
+                .sign(getAlgorithm());
+    }
+
+    public static String generateTokenV2(Account account, int expireAfter) {
+        return JWT.create()
+                .withSubject(String.valueOf(account.getId()))
+                .withExpiresAt(new Date(System.currentTimeMillis() + expireAfter))
+                .withIssuer(DEFAULT_ISSUER)
+                .withClaim(JwtUtil.ROLE_CLAIM_KEY, account.getRole() == 1 ? "ADMIN" : "USER")
+                .withClaim("username", account.getUsername())
                 .sign(getAlgorithm());
     }
 }
